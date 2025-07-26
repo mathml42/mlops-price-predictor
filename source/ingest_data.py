@@ -48,3 +48,9 @@ class DataIngestorFactory:
             return ZipDataIngestor()
         else:
             raise ValueError(f"No ingestor available for file extension: {file_extension}")
+        
+if __name__=="__main__":
+    # Data_Ingestor_Factory = DataIngestorFactory()
+    # DataIngestor_type = Data_Ingestor_Factory.get_data_ingestor('.zip')
+    # df = DataIngestor_type.ingest('/Users/himanshu/dev/study_p/mlops-price-predictor/data/archive.zip')
+    pass
