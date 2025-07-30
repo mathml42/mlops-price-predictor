@@ -1,5 +1,6 @@
 from steps.data_ingestion_step import data_ingestion_step
 from steps.handle_missing_value_step import handle_missing_values_step
+from steps.feature_engineering_step import feature_engineering_step
 
 from zenml import pipeline, Model
 
@@ -20,9 +21,11 @@ def ml_pipeline():
     # Handle Missing Values
     filled_data = handle_missing_values_step(data)
 
-    
+    transformed_data = feature_engineering_step(filled_data,
+                                                strategy="log", 
+                                                features=["Gr Liv Area", "SalePrice"])
 
-    return filled_data
+    return transformed_data
 
 if __name__=="__main__":
     # run ml pipeline
