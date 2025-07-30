@@ -117,7 +117,7 @@ class MissingValueHandler:
         pd.DataFrame: The DataFrame with missing values handled.
         """
         logging.info("Applying Missing Value Strategy.")
-        return self._strategy.handle()
+        return self._strategy.handle(df)
     
 # Example usage
 if __name__ == "__main__":
