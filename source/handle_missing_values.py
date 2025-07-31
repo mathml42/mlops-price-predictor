@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 import logging
 import pandas as pd
 
+# Setup logging configuration
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 class MissingValueHandlingStrategy(ABC):
     @abstractmethod
     def handle(self, df: pd.DataFrame) -> pd.DataFrame:

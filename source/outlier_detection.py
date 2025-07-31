@@ -6,6 +6,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+# Setup logging configuration
+logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 class OutlierDetectionStrategy(ABC):
     @abstractmethod
     def detect_outliers(self, df: pd.DataFrame) -> pd.DataFrame:
