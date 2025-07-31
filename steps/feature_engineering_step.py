@@ -1,10 +1,11 @@
 from zenml import step
 import pandas as pd
+from typing import Annotated
 from source.feature_engineering import FeatureEngineer, LogTransformation, MinMaxScaling, StandardScaling, OneHotEncoding
 
 @step
 def feature_engineering_step(df: pd.DataFrame, features: list = None, strategy: str ="log" 
-                             ) -> pd.DataFrame:
+                             ) -> Annotated[pd.DataFrame, "Transformed_dataframe"]:
     """Performs feature engineering using FeatureEngineer and selected strategy."""
     
     if features is None:

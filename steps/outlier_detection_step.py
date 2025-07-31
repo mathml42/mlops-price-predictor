@@ -1,5 +1,5 @@
 import logging
-from typing import Tuple, List
+from typing import Tuple, List, Annotated
 import matplotlib.pyplot as plt
 from zenml import step
 import pandas as pd
@@ -10,7 +10,7 @@ def outlier_detection_step(df: pd.DataFrame,
                            features:list,
                            strategy:str = "z_score",
                            method:str = "remove", 
-                           threshold:int =3) -> Tuple[pd.DataFrame, List[plt.Figure]]:
+                           threshold:int =3) -> Tuple[Annotated[pd.DataFrame,"Outlier_cleaned"], Annotated[List[plt.Figure], "Plots"]]:
     """Detects and removes outliers using OutlierDetector."""
     logging.info(f"Starting outlier detection step with DataFrame of shape: {df.shape}")
 
