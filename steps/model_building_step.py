@@ -1,6 +1,7 @@
 from zenml import step, Model, ArtifactConfig
 from typing import Annotated
 import logging
+import mlflow
 
 import pandas as pd
 from sklearn.compose import ColumnTransformer
@@ -9,6 +10,10 @@ from sklearn.linear_model import LinearRegression
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder
 
+from zenml.client import Client
+#Get the a experiment tracker from Zenml
+experiment_tracker = Client().active_stack.experiment_tracker
+
 model = Model(
     name="price_predictor",
     version=None,
@@ -16,7 +21,7 @@ model = Model(
     description="Price prediction model for houses."
 )
 
-@step(enable_cache=False,model=model)
+@step(enable_cache=False,model=model, experiment_tracker=experiment_tracker.name)
 def model_building_step(
     X_train: pd.DataFrame, y_train: pd.Series
 ) -> Annotated[Pipeline, ArtifactConfig(name="sklearn_pipeline", is_model_artifact=True)]:
@@ -62,19 +67,35 @@ def model_building_step(
 
     # Define the model training pipeline
     pipeline = Pipeline(steps=[("preprocessor", preprocessor), ("model", LinearRegression())])
+    
+    # Start an MLflow run to log the model training process
+    if not mlflow.active_run():
+        mlflow.start_run() # Start a new MLflow run if there isn't one active
+    
+    try:
+        # Enable autologging for scikit learn to automatically capture model metrics, parameters, and artifacts
+        mlflow.sklearn.autolog()
 
-    logging.info("Building and training the Linear Regression model.")
-    pipeline.fit(X_train, y_train)
-    logging.info("Model training completed.")
 
-    # Log the columns that the model expects
-    onehot_encoder = (
-        pipeline.named_steps["preprocessor"].transformers_[1][1].named_steps["onehot"]
-    )
-    onehot_encoder.fit(X_train[categorical_cols])
-    expected_columns = numerical_cols.tolist() + list(
-        onehot_encoder.get_feature_names_out(categorical_cols)
-    )
-    logging.info(f"Model expects the following columns: {expected_columns}")
+        logging.info("Building and training the Linear Regression model.")
+        pipeline.fit(X_train, y_train)
+        logging.info("Model training completed.")
 
+        # Log the columns that the model expects
+        onehot_encoder = (
+            pipeline.named_steps["preprocessor"].transformers_[1][1].named_steps["onehot"]
+        )
+        onehot_encoder.fit(X_train[categorical_cols])
+        expected_columns = numerical_cols.tolist() + list(
+            onehot_encoder.get_feature_names_out(categorical_cols)
+        )
+        logging.info(f"Model expects the following columns: {expected_columns}")
+
+    except Exception as e:
+        logging.error(f"Error during model training: {e}")
+        raise e
+    
+    finally:
+        # End the mlflow run
+        mlflow.end_run()
     return pipeline
